@@ -2878,15 +2878,15 @@ static int cwt_wakefn(wait_queue_t *wait, unsigned mode, int sync, void *key)
 
 static bool __cancel_work_timer(struct work_struct *work, bool is_dwork)
 {
-/* MTBF test fail, report pingpong error */
-		static DECLARE_WAIT_QUEUE_HEAD(cancel_waitq);
+	/* MTBF test fail, report pingpong error */
+	static DECLARE_WAIT_QUEUE_HEAD(cancel_waitq);
 	unsigned long flags;
 	int ret;
 
 	do {
 		ret = try_to_grab_pending(work, is_dwork, &flags);
 		/*
-		* If someone else is already canceling, wait for it to
+		 * If someone else is already canceling, wait for it to
 		 * finish.  flush_work() doesn't work for PREEMPT_NONE
 		 * because we may get scheduled between @work's completion
 		 * and the other canceling task resuming and clearing
@@ -2914,7 +2914,6 @@ static bool __cancel_work_timer(struct work_struct *work, bool is_dwork)
 				schedule();
 			finish_wait(&cancel_waitq, &cwait.wait);
 		}
-
 	} while (unlikely(ret < 0));
 
 	/* tell other tasks trying to grab @work to back off */
@@ -2923,6 +2922,7 @@ static bool __cancel_work_timer(struct work_struct *work, bool is_dwork)
 
 	flush_work(work);
 	clear_work_data(work);
+
 	/*
 	 * Paired with prepare_to_wait() above so that either
 	 * waitqueue_active() is visible here or !work_is_canceling() is
@@ -2931,6 +2931,7 @@ static bool __cancel_work_timer(struct work_struct *work, bool is_dwork)
 	smp_mb();
 	if (waitqueue_active(&cancel_waitq))
 		__wake_up(&cancel_waitq, TASK_NORMAL, 1, work);
+
 	return ret;
 }
 
