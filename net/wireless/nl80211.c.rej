@@ -1,0 +1,12 @@
+--- net/wireless/nl80211.c
++++ net/wireless/nl80211.c
+@@ -6568,6 +6568,9 @@ int cfg80211_testmode_reply(struct sk_buff *skb)
+ 	void *hdr = ((void **)skb->cb)[1];
+ 	struct nlattr *data = ((void **)skb->cb)[2];
+ 
++	/* clear CB data for netlink core to own from now on */
++	memset(skb->cb, 0, sizeof(skb->cb));
++
+ 	if (WARN_ON(!rdev->testmode_info)) {
+ 		kfree_skb(skb);
+ 		return -EINVAL;
